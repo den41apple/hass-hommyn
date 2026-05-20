@@ -1,0 +1,20 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Add a Hommyn device",
+        "description": "In the Hommyn app, open the device, tap **Share device**, and copy the `rusklimat://...` link. Paste it below.\n\nSupported device types: {supported}",
+        "data": {
+          "share_link": "Share link",
+          "device_name": "Custom name (optional)"
+        }
+      }
+    },
+    "error": {
+      "invalid_share_link": "This doesn't look like a valid Hommyn share link. Expected something starting with `rusklimat://device-share/...`."
+    },
+    "abort": {
+      "already_configured": "This device is already configured."
+    }
+  }
+}

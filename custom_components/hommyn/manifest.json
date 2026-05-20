@@ -1,0 +1,13 @@
+{
+  "domain": "hommyn",
+  "name": "Hommyn Cloud (Rusklimat)",
+  "version": "0.1.0",
+  "config_flow": true,
+  "documentation": "https://github.com/alimp01/hass-hommyn",
+  "issue_tracker": "https://github.com/alimp01/hass-hommyn/issues",
+  "iot_class": "cloud_push",
+  "requirements": ["paho-mqtt>=1.6.0"],
+  "codeowners": ["@alimp01"],
+  "integration_type": "hub",
+  "dependencies": []
+}
