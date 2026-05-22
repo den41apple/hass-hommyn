@@ -5,6 +5,10 @@ import logging
 from typing import Any
 
 from homeassistant.components.climate import (
+    SWING_BOTH,
+    SWING_HORIZONTAL,
+    SWING_OFF,
+    SWING_VERTICAL,
     ClimateEntity,
     ClimateEntityFeature,
     HVACMode,
@@ -22,6 +26,10 @@ from .const import (
     MIN_TEMP,
     MODE_TO_HVAC,
     SPEED_TO_FAN,
+    SWING_DEFAULT,
+    SWING_FIELD,
+    SWING_IDX_HORIZONTAL,
+    SWING_IDX_VERTICAL,
 )
 from .coordinator import HommynCoordinator
 from .entity import HommynEntity
@@ -39,6 +47,7 @@ SUPPORTED_HVAC_MODES = [
     HVACMode.FAN_ONLY,
 ]
 SUPPORTED_FAN_MODES = ["auto", "low", "medium", "high", "turbo"]
+SUPPORTED_SWING_MODES = [SWING_OFF, SWING_VERTICAL, SWING_HORIZONTAL, SWING_BOTH]
 
 
 async def async_setup_entry(
@@ -63,9 +72,11 @@ class HommynClimate(HommynEntity, ClimateEntity):
     _attr_max_temp = MAX_TEMP
     _attr_hvac_modes = SUPPORTED_HVAC_MODES
     _attr_fan_modes = SUPPORTED_FAN_MODES
+    _attr_swing_modes = SUPPORTED_SWING_MODES
     _attr_supported_features = (
         ClimateEntityFeature.TARGET_TEMPERATURE
         | ClimateEntityFeature.FAN_MODE
+        | ClimateEntityFeature.SWING_MODE
         | ClimateEntityFeature.TURN_ON
         | ClimateEntityFeature.TURN_OFF
     )
@@ -75,6 +86,8 @@ class HommynClimate(HommynEntity, ClimateEntity):
     ) -> None:
         super().__init__(coordinator, entry)
         self._attr_unique_id = self._mac
+        # Raw 8-char louver string; kept so set_swing_mode preserves fixed angles.
+        self._swing_raw = SWING_DEFAULT
 
     # ------------------------------------------------------------------
     # State decoding
@@ -89,6 +102,24 @@ class HommynClimate(HommynEntity, ClimateEntity):
             self._attr_current_temperature = _parse_float(value)
         elif key == "speed":
             self._attr_fan_mode = SPEED_TO_FAN.get(value.strip(), "auto")
+        elif key == SWING_FIELD:
+            self._decode_swing(value.strip())
+
+    def _decode_swing(self, raw: str) -> None:
+        # Pad/normalise to at least 4 chars so indexing is safe.
+        if len(raw) < 4:
+            raw = raw.ljust(8, "0")
+        self._swing_raw = raw
+        vertical = raw[SWING_IDX_VERTICAL] != "0"
+        horizontal = raw[SWING_IDX_HORIZONTAL] != "0"
+        if vertical and horizontal:
+            self._attr_swing_mode = SWING_BOTH
+        elif vertical:
+            self._attr_swing_mode = SWING_VERTICAL
+        elif horizontal:
+            self._attr_swing_mode = SWING_HORIZONTAL
+        else:
+            self._attr_swing_mode = SWING_OFF
 
     # ------------------------------------------------------------------
     # Commands
@@ -113,6 +144,15 @@ class HommynClimate(HommynEntity, ClimateEntity):
         if code is None:
             raise ValueError(f"Unsupported fan_mode {fan_mode}")
         self._publish("speed", code)
+
+    async def async_set_swing_mode(self, swing_mode: str) -> None:
+        want_vertical = swing_mode in (SWING_VERTICAL, SWING_BOTH)
+        want_horizontal = swing_mode in (SWING_HORIZONTAL, SWING_BOTH)
+        # Preserve any non-swing positions in the current louver string.
+        raw = list((self._swing_raw or SWING_DEFAULT).ljust(8, "0"))
+        raw[SWING_IDX_VERTICAL] = "1" if want_vertical else "0"
+        raw[SWING_IDX_HORIZONTAL] = "1" if want_horizontal else "0"
+        self._publish(SWING_FIELD, "".join(raw))
 
     async def async_turn_on(self) -> None:
         # Restore last non-off mode if we remember one; otherwise default to auto.

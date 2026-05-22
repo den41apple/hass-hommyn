@@ -31,6 +31,7 @@
 
 - режимами `off / auto / cool / dry / heat / fan_only`
 - скоростями вентилятора `auto / low / medium / high / turbo`
+- направлением обдува (swing): `off / vertical / horizontal / both`
 - целевой и текущей температурой (комнатный датчик внутреннего блока)
 
 Для бризеров / вентиляции — entity `fan.<имя>` со ступенчатой скоростью 1–6.
@@ -104,6 +105,8 @@ logger:
 Home Assistant integration for **Ballu / Electrolux / Zanussi / Royal Thermo / Hommyn** climate devices on the Rusklimat IoT platform.
 
 Connects to the official `mqtt.cloud.rusklimat.ru` cloud using app credentials extracted from the Hommyn Android app. Uses a unique client identifier so it **does not kick the device off the cloud** — HA and the Hommyn app can control the device in parallel.
+
+Climate entities expose hvac mode, fan speed, swing (off/vertical/horizontal/both), and target + current temperature.
 
 ### Setup
 

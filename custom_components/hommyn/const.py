@@ -61,6 +61,16 @@ FAN_TO_SPEED: dict[str, str] = {v: k for k, v in SPEED_TO_FAN.items()}
 MIN_TEMP = 16
 MAX_TEMP = 30
 
+# --- Swing ---
+# The louver state lives in `program_data/0`, an 8-char string where:
+#   index 1 -> vertical louver   ('0' = off, '1' = swing, '2'..'6' = fixed angle)
+#   index 3 -> horizontal louver ('0' = off, '1' = swing, '2'..'6' = fixed angle)
+# We only expose on/off swing here; fixed angles (program_data/3, /4) are TODO.
+SWING_FIELD = "program_data/0"
+SWING_IDX_VERTICAL = 1
+SWING_IDX_HORIZONTAL = 3
+SWING_DEFAULT = "00000000"
+
 # --- Config entry keys ---
 CONF_DEVICES = "devices"
 CONF_DEVICE_TYPE = "device_type"
