@@ -14,6 +14,7 @@ from .const import (
     CONF_DEVICE_TYPE,
     DOMAIN,
     FAN_TYPES,
+    HEAT_TYPES,
     SENSOR_TYPES,
 )
 from .coordinator import HommynCoordinator
@@ -30,6 +31,8 @@ def _platforms_for(devtype: int) -> list[Platform]:
         platforms.append(Platform.FAN)
     if devtype in SENSOR_TYPES:
         platforms.append(Platform.SENSOR)
+    if devtype in HEAT_TYPES:
+        platforms.append(Platform.NUMBER)
     return platforms
 
 

@@ -37,6 +37,10 @@ FAN_TYPES = {t for t, (p, _) in DEVICE_TYPES.items() if p == "fan"}
 # publish sensor/co2, sensor/temperature, expendables, diag/rssi.
 SENSOR_TYPES = {46, 69}
 
+# Device types with a heating element controlled by a temperature setpoint
+# (exposed as a number entity). Verified on a Ballu ASP breezer (69).
+HEAT_TYPES = {69}
+
 # --- HVAC mapping (used by climate.py) ---
 # State value (string) -> Home Assistant HVAC mode
 MODE_TO_HVAC: dict[str, str] = {

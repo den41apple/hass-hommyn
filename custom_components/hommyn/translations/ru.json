@@ -5,6 +5,9 @@
       "air_temperature": { "name": "Температура воздуха" },
       "filter": { "name": "Ресурс фильтра" },
       "rssi": { "name": "Сигнал WiFi" }
+    },
+    "number": {
+      "heat_setpoint": { "name": "Подогрев" }
     }
   },
   "config": {
