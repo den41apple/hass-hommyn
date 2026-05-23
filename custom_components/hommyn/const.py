@@ -32,6 +32,11 @@ DEVICE_TYPES: dict[int, tuple[str, str]] = {
 CLIMATE_TYPES = {t for t, (p, _) in DEVICE_TYPES.items() if p == "climate"}
 FAN_TYPES = {t for t, (p, _) in DEVICE_TYPES.items() if p == "fan"}
 
+# Device types that expose useful measurement sensors (CO2 / filter / etc.)
+# in addition to their primary platform. Ventilation (46) and breezer (69)
+# publish sensor/co2, sensor/temperature, expendables, diag/rssi.
+SENSOR_TYPES = {46, 69}
+
 # --- HVAC mapping (used by climate.py) ---
 # State value (string) -> Home Assistant HVAC mode
 MODE_TO_HVAC: dict[str, str] = {

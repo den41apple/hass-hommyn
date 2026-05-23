@@ -1,4 +1,12 @@
 {
+  "entity": {
+    "sensor": {
+      "co2": { "name": "CO2" },
+      "air_temperature": { "name": "Air temperature" },
+      "filter": { "name": "Filter life" },
+      "rssi": { "name": "WiFi signal" }
+    }
+  },
   "config": {
     "step": {
       "user": {

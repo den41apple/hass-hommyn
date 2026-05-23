@@ -14,15 +14,23 @@ from .const import (
     CONF_DEVICE_TYPE,
     DOMAIN,
     FAN_TYPES,
+    SENSOR_TYPES,
 )
 from .coordinator import HommynCoordinator
 
 _LOGGER = logging.getLogger(__name__)
 
-PLATFORMS_BY_TYPE: dict[int, Platform] = {
-    **{t: Platform.CLIMATE for t in CLIMATE_TYPES},
-    **{t: Platform.FAN for t in FAN_TYPES},
-}
+
+def _platforms_for(devtype: int) -> list[Platform]:
+    """Return every HA platform a given Hommyn device type maps to."""
+    platforms: list[Platform] = []
+    if devtype in CLIMATE_TYPES:
+        platforms.append(Platform.CLIMATE)
+    if devtype in FAN_TYPES:
+        platforms.append(Platform.FAN)
+    if devtype in SENSOR_TYPES:
+        platforms.append(Platform.SENSOR)
+    return platforms
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
@@ -41,15 +49,15 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     token: str = entry.data[CONF_DEVICE_TOKEN]
     coordinator.add_device("rusclimate", devtype, token)
 
-    platform = PLATFORMS_BY_TYPE.get(devtype)
-    if platform is None:
+    platforms = _platforms_for(devtype)
+    if not platforms:
         _LOGGER.warning(
             "Unknown Hommyn device type %s (mac=%s); only state mirroring",
             devtype, entry.data.get(CONF_DEVICE_MAC),
         )
         return True
 
-    await hass.config_entries.async_forward_entry_setups(entry, [platform])
+    await hass.config_entries.async_forward_entry_setups(entry, platforms)
     entry.async_on_unload(entry.add_update_listener(_async_update_listener))
     return True
 
@@ -59,9 +67,9 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     devtype: int = entry.data[CONF_DEVICE_TYPE]
     token: str = entry.data[CONF_DEVICE_TOKEN]
 
-    platform = PLATFORMS_BY_TYPE.get(devtype)
-    if platform is not None:
-        unload_ok = await hass.config_entries.async_unload_platforms(entry, [platform])
+    platforms = _platforms_for(devtype)
+    if platforms:
+        unload_ok = await hass.config_entries.async_unload_platforms(entry, platforms)
         if not unload_ok:
             return False
 

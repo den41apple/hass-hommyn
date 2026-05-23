@@ -1,4 +1,12 @@
 {
+  "entity": {
+    "sensor": {
+      "co2": { "name": "CO₂" },
+      "air_temperature": { "name": "Температура воздуха" },
+      "filter": { "name": "Ресурс фильтра" },
+      "rssi": { "name": "Сигнал WiFi" }
+    }
+  },
   "config": {
     "step": {
       "user": {
