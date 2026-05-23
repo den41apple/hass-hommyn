@@ -24,7 +24,7 @@ DEVICE_TYPES: dict[int, tuple[str, str]] = {
     13: ("climate", "Ballu Ice Peak / Electrolux Smartline / Ballu Eco Smart"),
     15: ("climate", "Electrolux Viking / Zanussi Perfecto / Ballu Greenland"),
     20: ("climate", "Ballu Platinum Evol / Olympio Legend"),
-    46: ("fan", "Hommyn ventilation"),
+    46: ("fan", "Hommyn ventilation / Electrolux Air Gate"),
     69: ("fan", "Hommyn CO2 breezer"),
     82: ("climate", "Goldstar GSAC"),
 }
@@ -38,8 +38,25 @@ FAN_TYPES = {t for t, (p, _) in DEVICE_TYPES.items() if p == "fan"}
 SENSOR_TYPES = {46, 69}
 
 # Device types with a heating element controlled by a temperature setpoint
-# (exposed as a number entity). Verified on a Ballu ASP breezer (69).
-HEAT_TYPES = {69}
+# (exposed as a number entity).
+#   69 breezer       -> verified 5..25 C
+#   46 air curtain   -> verified 5..35 C (Electrolux Air Gate)
+HEAT_TYPES = {46, 69}
+
+# Per-type fan speed maximum (number of discrete manual steps).
+#   69 breezer     -> 1..7
+#   46 air curtain -> 1..10
+SPEED_MAX_BY_TYPE: dict[int, int] = {46: 10, 69: 7}
+DEFAULT_SPEED_MAX = 7
+
+# Per-type heating setpoint range (Celsius).
+HEAT_RANGE_BY_TYPE: dict[int, tuple[int, int]] = {46: (5, 35), 69: (5, 25)}
+DEFAULT_HEAT_RANGE = (5, 25)
+
+# Device types that expose an "auto" fan preset via mode=4.
+# Verified on the breezer (69); the air curtain's extra modes (2/3/4) are
+# not yet mapped, so it gets plain on/off + speed for now.
+AUTO_PRESET_TYPES = {69}
 
 # --- HVAC mapping (used by climate.py) ---
 # State value (string) -> Home Assistant HVAC mode

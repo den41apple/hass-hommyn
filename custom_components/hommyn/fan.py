@@ -26,14 +26,17 @@ from homeassistant.util.percentage import (
     ranged_value_to_percentage,
 )
 
-from .const import DOMAIN
+from .const import (
+    AUTO_PRESET_TYPES,
+    CONF_DEVICE_TYPE,
+    DEFAULT_SPEED_MAX,
+    DOMAIN,
+    SPEED_MAX_BY_TYPE,
+)
 from .coordinator import HommynCoordinator
 from .entity import HommynEntity
 
 _LOGGER = logging.getLogger(__name__)
-
-# 7 discrete manual speeds.
-_SPEED_RANGE = (1, 7)
 
 PRESET_AUTO = "auto"
 
@@ -56,19 +59,24 @@ class HommynFan(HommynEntity, FanEntity):
 
     _attr_has_entity_name = True
     _attr_name = None
-    _attr_preset_modes = [PRESET_AUTO]
-    _attr_supported_features = (
-        FanEntityFeature.SET_SPEED
-        | FanEntityFeature.PRESET_MODE
-        | FanEntityFeature.TURN_ON
-        | FanEntityFeature.TURN_OFF
-    )
 
     def __init__(
         self, coordinator: HommynCoordinator, entry: ConfigEntry
     ) -> None:
         super().__init__(coordinator, entry)
         self._attr_unique_id = self._mac
+        devtype: int = entry.data[CONF_DEVICE_TYPE]
+        self._speed_range = (1, SPEED_MAX_BY_TYPE.get(devtype, DEFAULT_SPEED_MAX))
+        self._has_auto = devtype in AUTO_PRESET_TYPES
+        features = (
+            FanEntityFeature.SET_SPEED
+            | FanEntityFeature.TURN_ON
+            | FanEntityFeature.TURN_OFF
+        )
+        if self._has_auto:
+            features |= FanEntityFeature.PRESET_MODE
+            self._attr_preset_modes = [PRESET_AUTO]
+        self._attr_supported_features = features
         self._mode: str | None = None
         self._raw_speed: int | None = None
         self._last_manual_speed = 3  # remembered for turn_on
@@ -86,7 +94,7 @@ class HommynFan(HommynEntity, FanEntity):
             except (TypeError, ValueError):
                 self._raw_speed = None
             else:
-                if 1 <= (self._raw_speed or 0) <= _SPEED_RANGE[1]:
+                if 1 <= (self._raw_speed or 0) <= self._speed_range[1]:
                     self._last_manual_speed = self._raw_speed
 
     @property
@@ -97,23 +105,25 @@ class HommynFan(HommynEntity, FanEntity):
 
     @property
     def preset_mode(self) -> str | None:
-        return PRESET_AUTO if self._mode == MODE_AUTO else None
+        if self._has_auto and self._mode == MODE_AUTO:
+            return PRESET_AUTO
+        return None
 
     @property
     def percentage(self) -> int | None:
         # In auto mode the device drives the fan; show no manual % position.
         if self._mode in (None, MODE_OFF):
             return 0
-        if self._mode == MODE_AUTO:
+        if self._has_auto and self._mode == MODE_AUTO:
             return None
         if self._raw_speed is None:
             return None
-        clamped = max(_SPEED_RANGE[0], min(_SPEED_RANGE[1], self._raw_speed))
-        return ranged_value_to_percentage(_SPEED_RANGE, clamped)
+        clamped = max(self._speed_range[0], min(self._speed_range[1], self._raw_speed))
+        return ranged_value_to_percentage(self._speed_range, clamped)
 
     @property
     def speed_count(self) -> int:
-        return _SPEED_RANGE[1]
+        return self._speed_range[1]
 
     # ------------------------------------------------------------------
     # Commands
@@ -123,8 +133,8 @@ class HommynFan(HommynEntity, FanEntity):
         if percentage <= 0:
             self._publish("mode", MODE_OFF)
             return
-        raw = math.ceil(percentage_to_ranged_value(_SPEED_RANGE, percentage))
-        raw = max(_SPEED_RANGE[0], min(_SPEED_RANGE[1], raw))
+        raw = math.ceil(percentage_to_ranged_value(self._speed_range, percentage))
+        raw = max(self._speed_range[0], min(self._speed_range[1], raw))
         # Setting a manual speed implies manual mode.
         self._publish("mode", MODE_MANUAL)
         self._publish("speed", raw)

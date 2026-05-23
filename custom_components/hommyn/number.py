@@ -9,15 +9,16 @@ from homeassistant.const import UnitOfTemperature
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .const import DOMAIN
+from .const import (
+    CONF_DEVICE_TYPE,
+    DEFAULT_HEAT_RANGE,
+    DOMAIN,
+    HEAT_RANGE_BY_TYPE,
+)
 from .coordinator import HommynCoordinator
 from .entity import HommynEntity
 
 _LOGGER = logging.getLogger(__name__)
-
-# Heating setpoint range observed on a Ballu ASP breezer (5 = heater off/min).
-HEAT_MIN = 5
-HEAT_MAX = 25
 
 
 async def async_setup_entry(
@@ -30,13 +31,11 @@ async def async_setup_entry(
 
 
 class HommynHeatSetpoint(HommynEntity, NumberEntity):
-    """Breezer heating setpoint (state/temperature, control/temperature)."""
+    """Breezer / air-curtain heating setpoint (state & control/temperature)."""
 
     _attr_has_entity_name = True
     _attr_translation_key = "heat_setpoint"
     _attr_icon = "mdi:radiator"
-    _attr_native_min_value = HEAT_MIN
-    _attr_native_max_value = HEAT_MAX
     _attr_native_step = 1
     _attr_native_unit_of_measurement = UnitOfTemperature.CELSIUS
     _attr_mode = NumberMode.SLIDER
@@ -46,6 +45,10 @@ class HommynHeatSetpoint(HommynEntity, NumberEntity):
     ) -> None:
         super().__init__(coordinator, entry)
         self._attr_unique_id = f"{self._mac}_heat_setpoint"
+        devtype: int = entry.data[CONF_DEVICE_TYPE]
+        lo, hi = HEAT_RANGE_BY_TYPE.get(devtype, DEFAULT_HEAT_RANGE)
+        self._attr_native_min_value = lo
+        self._attr_native_max_value = hi
 
     def _apply_state(self, key: str, value: str) -> None:
         if key == "temperature":

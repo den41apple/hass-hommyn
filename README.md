@@ -19,8 +19,8 @@
 | 13 | **Ballu Ice Peak / Electrolux Smartline / Ballu Eco Smart** (основной target) |
 | 15 | Electrolux Viking / Zanussi Perfecto / Ballu Greenland |
 | 20 | Ballu Platinum Evol / Olympio Legend |
-| 46 | Hommyn вентиляция |
-| 69 | Hommyn CO₂-бризер |
+| 46 | Hommyn вентиляция / Electrolux Air Gate (тепловая завеса) — 10 ступеней, подогрев 5–35 °C |
+| 69 | Hommyn CO₂-бризер — 7 ступеней, подогрев 5–25 °C, датчик CO₂ |
 | 82 | Goldstar GSAC |
 
 Полевые испытания пока проведены только на `devtype 13`. Остальные модели используют тот же MQTT-протокол, но могут иметь нюансы — заводите [issue](https://github.com/alimp01/hass-hommyn/issues) с моделью устройства и логами.

@@ -43,6 +43,8 @@ class HommynSensorDescription(SensorEntityDescription):
     state_key: str
     # parse a raw payload string into the native value (or None to ignore)
     parse: Callable[[str], float | int | None] = float
+    # device types that actually publish this key (None = all sensor types)
+    device_types: frozenset[int] | None = None
 
 
 def _parse_float(raw: str) -> float | None:
@@ -79,6 +81,7 @@ SENSORS: tuple[HommynSensorDescription, ...] = (
         native_unit_of_measurement=CONCENTRATION_PARTS_PER_MILLION,
         state_class=SensorStateClass.MEASUREMENT,
         parse=_parse_int,
+        device_types=frozenset({69}),  # CO2 breezer only
     ),
     HommynSensorDescription(
         key="air_temperature",
@@ -98,6 +101,7 @@ SENSORS: tuple[HommynSensorDescription, ...] = (
         icon="mdi:air-filter",
         entity_category=EntityCategory.DIAGNOSTIC,
         parse=_parse_filter,
+        device_types=frozenset({69}),  # breezer has a replaceable filter
     ),
     HommynSensorDescription(
         key="rssi",
@@ -118,9 +122,14 @@ async def async_setup_entry(
     entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
+    from .const import CONF_DEVICE_TYPE
+
     coordinator: HommynCoordinator = hass.data[DOMAIN]["coordinator"]
+    devtype: int = entry.data[CONF_DEVICE_TYPE]
     async_add_entities(
-        HommynSensor(coordinator, entry, desc) for desc in SENSORS
+        HommynSensor(coordinator, entry, desc)
+        for desc in SENSORS
+        if desc.device_types is None or devtype in desc.device_types
     )
 
 
