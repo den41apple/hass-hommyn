@@ -176,10 +176,28 @@ class HommynCoordinator:
             value = ""
         self.state[token][key] = value
 
-        # `state/error/connection` is the device's own connectivity flag:
-        # "false" = online, "true" = LWT fired (offline).
+        # Availability handling.
+        #
+        # `state/error/connection` is the device's own connectivity flag,
+        # published retained as an MQTT last-will: "false" = online, "true" =
+        # the broker fired the LWT because the device's TCP session dropped.
+        # Some firmwares (e.g. the Ballu ASP breezer, devtype 69) never
+        # republish "false" after reconnecting, so a stale retained "true"
+        # would latch the device offline forever even while it keeps
+        # publishing live telemetry. So: treat any *live* (non-retained)
+        # message as proof the device is talking right now, and never latch
+        # offline on a *retained* "true".
+        is_live = not msg.retain
         if key == "error/connection":
-            self._mark_availability(token, value.strip().lower() == "false")
+            online = value.strip().lower() == "false"
+            if is_live or online:
+                # Live connect/disconnect is authoritative; a retained "false"
+                # is safe to trust. A retained "true" is ignored here — live
+                # telemetry (below) decides reachability instead.
+                self._mark_availability(token, online)
+        elif is_live:
+            # Any live state update proves the device is online right now.
+            self._mark_availability(token, True)
 
         # Bounce into HA's event loop to fire dispatcher signals.
         self.hass.loop.call_soon_threadsafe(

@@ -1,7 +1,7 @@
 {
   "domain": "hommyn",
   "name": "Hommyn Cloud (Rusklimat)",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "config_flow": true,
   "documentation": "https://github.com/alimp01/hass-hommyn",
   "issue_tracker": "https://github.com/alimp01/hass-hommyn/issues",
