@@ -110,8 +110,10 @@ class HommynClimate(HommynEntity, ClimateEntity):
         if len(raw) < 4:
             raw = raw.ljust(8, "0")
         self._swing_raw = raw
-        vertical = raw[SWING_IDX_VERTICAL] != "0"
-        horizontal = raw[SWING_IDX_HORIZONTAL] != "0"
+        # Only "1" means the louver is sweeping; any other non-zero value is a
+        # fixed angle, which must not be reported as swinging.
+        vertical = raw[SWING_IDX_VERTICAL] == "1"
+        horizontal = raw[SWING_IDX_HORIZONTAL] == "1"
         if vertical and horizontal:
             self._attr_swing_mode = SWING_BOTH
         elif vertical:
