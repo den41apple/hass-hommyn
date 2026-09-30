@@ -25,6 +25,7 @@ DEVICE_TYPES: dict[int, tuple[str, str]] = {
     15: ("climate", "Electrolux Viking / Zanussi Perfecto / Ballu Greenland"),
     20: ("climate", "Ballu Platinum Evol / Olympio Legend"),
     46: ("fan", "Hommyn ventilation / Electrolux Air Gate"),
+    55: ("climate", "Zanussi Barocco DC Inverter"),
     69: ("fan", "Hommyn CO2 breezer"),
     82: ("climate", "Goldstar GSAC"),
 }
@@ -83,9 +84,70 @@ SPEED_TO_FAN: dict[str, str] = {
 }
 FAN_TO_SPEED: dict[str, str] = {v: k for k, v in SPEED_TO_FAN.items()}
 
+# Per-devtype override of the fan scale. Types not listed here fall back to
+# SPEED_TO_FAN above.
+#
+# devtype 55 (Zanussi Barocco DC Inverter) shows 8 positions in the Hommyn app:
+#   AUTO, QUITE, LOW, MID-LOW, MID, MID-HIGH, HIGH, TURBO
+# UNVERIFIED: the numeric codes below assume 0..7 in the same order as the app
+# dial. If the AC reacts to the wrong speed, this table is what to fix.
+SPEED_TO_FAN_BY_TYPE: dict[int, dict[str, str]] = {
+    55: {
+        "0": "auto",
+        "1": "quiet",
+        "2": "low",
+        "3": "mid_low",
+        "4": "medium",
+        "5": "mid_high",
+        "6": "high",
+        "7": "turbo",
+    },
+}
+FAN_TO_SPEED_BY_TYPE: dict[int, dict[str, str]] = {
+    devtype: {v: k for k, v in table.items()}
+    for devtype, table in SPEED_TO_FAN_BY_TYPE.items()
+}
+
 # Climate target-temperature bounds (Celsius).
 MIN_TEMP = 16
 MAX_TEMP = 30
+
+# Per-devtype override of the upper bound. devtype 55 (Zanussi Barocco DC)
+# accepts 31 C in the Hommyn app.
+MAX_TEMP_BY_TYPE: dict[int, int] = {55: 31}
+
+# Device types whose louvers can be parked at fixed angles (exposed as two
+# select entities in addition to the climate swing on/off).
+LOUVER_SELECT_TYPES = {55}
+
+# Device types with display-backlight / buzzer switches.
+DISPLAY_SWITCH_TYPES = {55}
+SOUND_SWITCH_TYPES = {55}
+
+# Verified on devtype 55: the display backlight lives in `backlight`,
+# "true"/"false".
+KEY_BACKLIGHT = "backlight"
+# Verified on devtype 55: the buzzer lives in state/control `volume`, "1"/"0"
+# (unlike `backlight`, not "true"/"false").
+KEY_SOUND = "volume"
+
+# Louver control on devtype 55, verified from the AC -> HA stream:
+#   program_data/0 — 8-char flag string, "1" at the axis index means "swing"
+#   program_data/3 — horizontal louver fixed angle, "01".."05"
+#   program_data/4 — vertical louver fixed angle, "01".."05"
+LOUVER_ANGLE_FIELD_HORIZONTAL = "program_data/3"
+LOUVER_ANGLE_FIELD_VERTICAL = "program_data/4"
+
+LOUVER_OPTION_SWING = "swing"
+LOUVER_ANGLES: dict[str, str] = {
+    "01": "pos_1",
+    "02": "pos_2",
+    "03": "pos_3",
+    "04": "pos_4",
+    "05": "pos_5",
+}
+LOUVER_ANGLES_REV: dict[str, str] = {v: k for k, v in LOUVER_ANGLES.items()}
+LOUVER_OPTIONS: list[str] = [LOUVER_OPTION_SWING, *LOUVER_ANGLES.values()]
 
 # --- Swing ---
 # The louver state lives in `program_data/0`, an 8-char string where:

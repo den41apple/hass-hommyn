@@ -8,6 +8,52 @@
     },
     "number": {
       "heat_setpoint": { "name": "Heating setpoint" }
+    },
+    "climate": {
+      "split_ac": {
+        "state_attributes": {
+          "fan_mode": {
+            "state": {
+              "auto": "Auto",
+              "quiet": "Quiet",
+              "low": "Low",
+              "mid_low": "Medium-low",
+              "medium": "Medium",
+              "mid_high": "Medium-high",
+              "high": "High",
+              "turbo": "Turbo"
+            }
+          }
+        }
+      }
+    },
+    "select": {
+      "louver_vertical": {
+        "name": "Vertical louver",
+        "state": {
+          "swing": "Swing",
+          "pos_1": "Position 1",
+          "pos_2": "Position 2",
+          "pos_3": "Position 3",
+          "pos_4": "Position 4",
+          "pos_5": "Position 5"
+        }
+      },
+      "louver_horizontal": {
+        "name": "Horizontal louver",
+        "state": {
+          "swing": "Swing",
+          "pos_1": "Position 1",
+          "pos_2": "Position 2",
+          "pos_3": "Position 3",
+          "pos_4": "Position 4",
+          "pos_5": "Position 5"
+        }
+      }
+    },
+    "switch": {
+      "display": { "name": "Display backlight" },
+      "sound": { "name": "Sound" }
     }
   },
   "config": {

@@ -12,10 +12,13 @@ from .const import (
     CONF_DEVICE_MAC,
     CONF_DEVICE_TOKEN,
     CONF_DEVICE_TYPE,
+    DISPLAY_SWITCH_TYPES,
     DOMAIN,
     FAN_TYPES,
     HEAT_TYPES,
+    LOUVER_SELECT_TYPES,
     SENSOR_TYPES,
+    SOUND_SWITCH_TYPES,
 )
 from .coordinator import HommynCoordinator
 
@@ -33,6 +36,10 @@ def _platforms_for(devtype: int) -> list[Platform]:
         platforms.append(Platform.SENSOR)
     if devtype in HEAT_TYPES:
         platforms.append(Platform.NUMBER)
+    if devtype in LOUVER_SELECT_TYPES:
+        platforms.append(Platform.SELECT)
+    if devtype in DISPLAY_SWITCH_TYPES or devtype in SOUND_SWITCH_TYPES:
+        platforms.append(Platform.SWITCH)
     return platforms
 
 
