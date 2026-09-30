@@ -18,9 +18,10 @@ Home Assistant integration for **Hommyn / Rusklimat** smart devices — Ballu, E
 | 15 | Electrolux Viking / Zanussi Perfecto / Ballu Greenland |
 | 20 | Ballu Platinum Evol / Olympio Legend |
 | 46 | Hommyn ventilation |
+| 55 | Zanussi Barocco DC Inverter |
 | 69 | Hommyn CO2 breezer |
 | 82 | Goldstar GSAC |
 
-Only `devtype 13` has been tested on real hardware. Others use the same protocol but may have minor quirks — please [open an issue](https://github.com/alimp01/hass-hommyn/issues) with your model.
+Only `devtype 13` and `55` have been tested on real hardware. Others use the same protocol but may have minor quirks — please [open an issue](https://github.com/alimp01/hass-hommyn/issues) with your model.
 
 See the full README in the repository for setup steps and troubleshooting.

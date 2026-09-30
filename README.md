@@ -24,7 +24,7 @@
 | 69 | Hommyn CO₂-бризер — 7 ступеней, подогрев 5–25 °C, датчик CO₂ |
 | 82 | Goldstar GSAC |
 
-Полевые испытания пока проведены только на `devtype 13`. Остальные модели используют тот же MQTT-протокол, но могут иметь нюансы — заводите [issue](https://github.com/alimp01/hass-hommyn/issues) с моделью устройства и логами.
+Полевые испытания проведены на `devtype 13` и `devtype 55`. Остальные модели используют тот же MQTT-протокол, но могут иметь нюансы — заводите [issue](https://github.com/alimp01/hass-hommyn/issues) с моделью устройства и логами.
 
 ## Что появится в HA
 
@@ -34,6 +34,14 @@
 - скоростями вентилятора `auto / low / medium / high / turbo`
 - направлением обдува (swing): `off / vertical / horizontal / both`
 - целевой и текущей температурой (комнатный датчик внутреннего блока)
+
+Дополнительно для `devtype 55` (Zanussi Barocco DC Inverter):
+
+- 8 скоростей вентилятора: `auto / quiet / low / mid_low / medium / mid_high / high / turbo` (соответствие кодов позициям в приложении — предположение)
+- целевая температура до 31 °C; текущая температура не показывается — устройство её не публикует
+- `select.*_louver_vertical`, `select.*_louver_horizontal` — покачивание или одно из 5 фиксированных положений жалюзи
+- `switch.*_display` — подсветка дисплея, `switch.*_sound` — звук (обе — настройки)
+- диагностика: `sensor.*_mqtt_latency`, `sensor.*_gateway_latency` (мс), `sensor.*_gateway_packet_loss` (%) — единицы измерения предположены
 
 Для бризеров / вентиляции — entity `fan.<имя>`:
 
@@ -118,7 +126,7 @@ Home Assistant integration for **Ballu / Electrolux / Zanussi / Royal Thermo / H
 
 Connects to the official `mqtt.cloud.rusklimat.ru` cloud using app credentials extracted from the Hommyn Android app. Uses a unique client identifier so it **does not kick the device off the cloud** — HA and the Hommyn app can control the device in parallel.
 
-Climate entities expose hvac mode, fan speed, swing (off/vertical/horizontal/both), and target + current temperature.
+Climate entities expose hvac mode, fan speed, swing (off/vertical/horizontal/both), and target + current temperature. devtype 55 additionally gets louver position selects, display/sound switches and link diagnostics sensors.
 
 ### Setup
 
@@ -129,7 +137,7 @@ Climate entities expose hvac mode, fan speed, swing (off/vertical/horizontal/bot
 
 ### Supported
 
-Split AC `devtype` 8/13/15/20/82, ventilation/breezer 46/69. Only 13 is field-tested; others use the same protocol but may have quirks — please open an issue with your model.
+Split AC `devtype` 8/13/15/20/55/82, ventilation/breezer 46/69. Only 13 and 55 are field-tested; others use the same protocol but may have quirks — please open an issue with your model.
 
 ### Limitations
 
