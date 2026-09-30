@@ -36,7 +36,8 @@ FAN_TYPES = {t for t, (p, _) in DEVICE_TYPES.items() if p == "fan"}
 # Device types that expose useful measurement sensors (CO2 / filter / etc.)
 # in addition to their primary platform. Ventilation (46) and breezer (69)
 # publish sensor/co2, sensor/temperature, expendables, diag/rssi.
-SENSOR_TYPES = {46, 69}
+# Split ACs (55) publish diag/* only — see SENSORS in sensor.py.
+SENSOR_TYPES = {46, 55, 69}
 
 # Device types with a heating element controlled by a temperature setpoint
 # (exposed as a number entity).

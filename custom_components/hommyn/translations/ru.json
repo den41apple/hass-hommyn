@@ -4,7 +4,10 @@
       "co2": { "name": "CO₂" },
       "air_temperature": { "name": "Температура воздуха" },
       "filter": { "name": "Ресурс фильтра" },
-      "rssi": { "name": "Сигнал WiFi" }
+      "rssi": { "name": "Сигнал WiFi" },
+      "mqtt_latency": { "name": "Задержка MQTT" },
+      "gw_latency": { "name": "Задержка до шлюза" },
+      "gw_loss": { "name": "Потери до шлюза" }
     },
     "number": {
       "heat_setpoint": { "name": "Подогрев" }

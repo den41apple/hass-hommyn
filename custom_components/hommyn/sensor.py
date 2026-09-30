@@ -24,6 +24,7 @@ from homeassistant.const import (
     SIGNAL_STRENGTH_DECIBELS_MILLIWATT,
     EntityCategory,
     UnitOfTemperature,
+    UnitOfTime,
 )
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -91,6 +92,7 @@ SENSORS: tuple[HommynSensorDescription, ...] = (
         native_unit_of_measurement=UnitOfTemperature.CELSIUS,
         state_class=SensorStateClass.MEASUREMENT,
         parse=_parse_float,
+        device_types=frozenset({46, 69}),  # split ACs (55) have no room probe
     ),
     HommynSensorDescription(
         key="filter",
@@ -112,6 +114,41 @@ SENSORS: tuple[HommynSensorDescription, ...] = (
         state_class=SensorStateClass.MEASUREMENT,
         entity_category=EntityCategory.DIAGNOSTIC,
         entity_registry_enabled_default=False,
+        parse=_parse_int,
+    ),
+    # Link diagnostics published by the Wi-Fi module. Verified on devtype 55
+    # (Zanussi Barocco DC): diag/rssi, diag/mqtt_latency, diag/gw_latency and
+    # diag/gw_loss arrive together every few minutes.
+    # UNVERIFIED: the units. Latencies look like milliseconds and gw_loss like
+    # a percentage, but the protocol does not state them.
+    HommynSensorDescription(
+        key="mqtt_latency",
+        state_key="diag/mqtt_latency",
+        translation_key="mqtt_latency",
+        native_unit_of_measurement=UnitOfTime.MILLISECONDS,
+        state_class=SensorStateClass.MEASUREMENT,
+        icon="mdi:cloud-clock-outline",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        parse=_parse_int,
+    ),
+    HommynSensorDescription(
+        key="gw_latency",
+        state_key="diag/gw_latency",
+        translation_key="gw_latency",
+        native_unit_of_measurement=UnitOfTime.MILLISECONDS,
+        state_class=SensorStateClass.MEASUREMENT,
+        icon="mdi:router-wireless",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        parse=_parse_int,
+    ),
+    HommynSensorDescription(
+        key="gw_loss",
+        state_key="diag/gw_loss",
+        translation_key="gw_loss",
+        native_unit_of_measurement=PERCENTAGE,
+        state_class=SensorStateClass.MEASUREMENT,
+        icon="mdi:close-network-outline",
+        entity_category=EntityCategory.DIAGNOSTIC,
         parse=_parse_int,
     ),
 )

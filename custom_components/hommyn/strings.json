@@ -4,7 +4,10 @@
       "co2": { "name": "CO2" },
       "air_temperature": { "name": "Air temperature" },
       "filter": { "name": "Filter life" },
-      "rssi": { "name": "WiFi signal" }
+      "rssi": { "name": "WiFi signal" },
+      "mqtt_latency": { "name": "MQTT latency" },
+      "gw_latency": { "name": "Gateway latency" },
+      "gw_loss": { "name": "Gateway packet loss" }
     },
     "number": {
       "heat_setpoint": { "name": "Heating setpoint" }
