@@ -52,7 +52,8 @@ class HommynCoordinator:
         self._client_id = CLIENT_ID_PREFIX + uuid.uuid4().hex.lower()
         self._connect_lock = asyncio.Lock()
         self._stop = asyncio.Event()
-        self._tls_ctx = self._build_tls_context()
+        # Built in async_start(): load_default_certs() does blocking file I/O.
+        self._tls_ctx: ssl.SSLContext | None = None
         self._loop_task: asyncio.Task[None] | None = None
 
     # ------------------------------------------------------------------
@@ -63,6 +64,9 @@ class HommynCoordinator:
         """Open the cloud session in the background."""
         if self._loop_task is not None:
             return
+        self._tls_ctx = await self.hass.async_add_executor_job(
+            self._build_tls_context
+        )
         self._loop_task = self.hass.async_create_background_task(
             self._runner(), name="hommyn_mqtt"
         )
@@ -134,6 +138,7 @@ class HommynCoordinator:
     def _create_socket(self) -> ssl.SSLSocket:
         # paho calls this every reconnect; resolve hostname each time so DNS
         # changes (e.g. failover) are picked up.
+        assert self._tls_ctx is not None
         raw = socket.create_connection((CLOUD_HOST, CLOUD_PORT), timeout=15)
         return self._tls_ctx.wrap_socket(raw, server_hostname=CLOUD_HOST)
 

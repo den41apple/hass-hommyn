@@ -42,9 +42,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     coordinator: HommynCoordinator | None = hass.data.get(DOMAIN, {}).get("coordinator")
     if coordinator is None:
         coordinator = HommynCoordinator(hass)
-        await coordinator.async_start()
+        # Register before awaiting: async_start() yields to the loop, and a
+        # concurrently loading entry must find this coordinator, not build a second.
         hass.data.setdefault(DOMAIN, {})["coordinator"] = coordinator
         hass.data[DOMAIN].setdefault("entries", set())
+        await coordinator.async_start()
 
     hass.data[DOMAIN]["entries"].add(entry.entry_id)
 
