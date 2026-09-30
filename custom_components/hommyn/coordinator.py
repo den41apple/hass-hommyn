@@ -174,6 +174,10 @@ class HommynCoordinator:
             value = msg.payload.decode("utf-8", "replace")
         except Exception:  # noqa: BLE001
             value = ""
+        _LOGGER.debug(
+            "AC -> HA %s = %s%s",
+            msg.topic, value, " (retained)" if msg.retain else "",
+        )
         self.state[token][key] = value
 
         # Availability handling.
